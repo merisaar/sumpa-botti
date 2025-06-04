@@ -1,3 +1,10 @@
+
+# Virtual environment directories
+sumpa-bot/
+
+# Python cache directories
+__pycache__
+
 # Logs
 logs
 *.log
