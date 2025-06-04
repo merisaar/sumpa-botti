@@ -27,4 +27,4 @@ jobs:
           if [ -f "test_bot.py" ]; then pytest; else echo "No tests found."; fi
 
       - name: Deploy to Render
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
