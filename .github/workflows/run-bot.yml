@@ -27,4 +27,11 @@ jobs:
           if [ -f "test_bot.py" ]; then pytest; else echo "No tests found."; fi
 
       - name: Deploy to Render
-        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          echo "Triggering Render Deploy..."
+          response=$(curl -s -w "%{http_code}" -o /tmp/render_response.txt ${{ secrets.RENDER_DEPLOY_HOOK }})
+          cat /tmp/render_response.txt
+          if [ "$response" != "200" ]; then
+            echo "Render deploy failed with HTTP $response"
+            exit 1
+          fi
