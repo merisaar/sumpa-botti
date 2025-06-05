@@ -10,15 +10,26 @@ client = WebClient(token=SLACK_BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def build_user_lookup():
+    try:
+        response = client.users_list()
+        users = response["members"]
+        lookup = {user["name"]: user["id"] for user in users if not user.get("deleted", False)}
+        return lookup
+    except SlackApiError as e:
+        logger.error(f"Error building user lookup: {e.response['error']}")
+        return {}
+    
+user_lookup = build_user_lookup()
+
 def get_user_id_by_name(name):
     logger.info(f"Looking for user ID for: {name}")
-    name = name.lstrip("@")
     try:
-        result = client.users_list()
-        logger.info(f"Found {result['members']} in the workspace.")
-        for member in result['members']:
-            if member['name'] == name:
-                return member['id']
+        nick_clean = nick.lstrip("@").lower()
+        user_id = user_lookup.get(nick_clean)
+        logger.info(f"Found {user_id} in the workspace.")
+        if(user_id is not None):
+            return user_id
     except SlackApiError as e:
         logger.error(f"Error getting user list: {e.response['error']}")
     return None
