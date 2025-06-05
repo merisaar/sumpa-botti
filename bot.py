@@ -27,6 +27,8 @@ def get_user_id_by_name(name):
     try:
         nick_clean = name.lstrip("@").lower()
         user_id = user_lookup.get(nick_clean)
+        logger.info(f"Lookup {user_lookup}")
+        logger.info(f"User ID found: {user_id} for name: {nick_clean}")
         if(user_id is not None):
             return user_id
     except SlackApiError as e:
@@ -37,7 +39,6 @@ def get_or_create_channel(channel_name):
     logger.info(f"Checking for channel: {channel_name}")
     try:
         response = client.conversations_list(types="private_channel", limit=1000, exclude_archived=True)
-        logger.info(f"Found {response['channels']} private channels.")
         for ch in response["channels"]:
             if ch["name"] == channel_name:
                 return ch["id"]
