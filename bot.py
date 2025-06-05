@@ -32,7 +32,7 @@ def get_or_create_channel(channel_name):
         result = client.conversations_create(name=channel_name, is_private=True)
         return result["channel"]["id"]
     except SlackApiError as e:
-        print(f"Error with channel: {e.response['error']}")
+        logger.error(f"Error with channel: {e.response['error']}")
         return None
 
 def invite_users_to_channel(channel_id, user_ids):
@@ -40,7 +40,7 @@ def invite_users_to_channel(channel_id, user_ids):
     try:
         client.conversations_invite(channel=channel_id, users=",".join(user_ids))
     except SlackApiError as e:
-        print(f"Invite failed: {e.response['error']}")
+        logger.error(f"Invite failed: {e.response['error']}")
 
 def process_csv_from_df(df):
     grouped = df.groupby("channel_name")["slack_nick"].apply(list)
