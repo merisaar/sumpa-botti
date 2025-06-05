@@ -25,7 +25,7 @@ user_lookup = build_user_lookup()
 def get_user_id_by_name(name):
     logger.info(f"Looking for user ID for: {name}")
     try:
-        nick_clean = nick.lstrip("@").lower()
+        nick_clean = name.lstrip("@").lower()
         user_id = user_lookup.get(nick_clean)
         logger.info(f"Found {user_id} in the workspace.")
         if(user_id is not None):
