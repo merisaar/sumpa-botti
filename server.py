@@ -20,7 +20,7 @@ def handle_upload_command(ack, body, client, respond):
         blocks=[
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"Hi <@{user_id}>! Please upload your csv file below."}
+                "text": {"type": "mrkdwn", "text": f"Hi <@{user_id}>! Please upload your CSV file below."}
             }
         ],
         response_type="ephemeral"
@@ -28,35 +28,29 @@ def handle_upload_command(ack, body, client, respond):
 
 # Monitor file uploads
 @app.event("file_shared")
-def handle_file_shared(event, client, say):
+def handle_file_shared(event, client):
     file_id = event["file_id"]
-    file_info = client.files_info(file=file_id)
-    file_url = file_info["file"]["url_private_download"]
-    file_name = file_info["file"]["name"]
     user = event["user_id"]
-    client.chat_postMessage(channel=user, text="Does your CSV have a header row? (y/n)")
-    response = client.conversations_history(channel=user, limit=1)
-    user_response = response["messages"][0]["text"].strip().lower()
-    if user_response not in ["y", "n"]:
-        client.chat_postMessage(channel=user, text="❌ Please respond with 'y' or 'n'.")
-        return
-    
-    if not file_name.endswith(".xlsx"):
-        client.chat_postMessage(channel=user, text="❌ Please upload a valid .xlsx CSV file.")
+
+    file_info = client.files_info(file=file_id)
+    file = file_info["file"]
+    file_name = file["name"]
+    file_url = file["url_private_download"]
+
+    if not file_name.endswith(".csv"):
+        client.chat_postMessage(channel=user, text="❌ Please upload a valid `.csv` file.")
         return
 
-    # Download file with auth
+    # Download CSV
     headers = {"Authorization": f"Bearer {os.environ['SLACK_BOT_TOKEN']}"}
     response = requests.get(file_url, headers=headers)
-
-    if user_response == "n":
-        df = pd.read_csv(BytesIO(response.content), header=None)
-    else:
-        df = pd.read_csv(BytesIO(response.content))
-
-    process_csv_from_df(df)
-
-    client.chat_postMessage(channel=user, text="✅ CSV processed and channels handled!")
+    
+    try:
+        df = pd.read_csv(BytesIO(response.content))  # Assumes header is present
+        process_csv_from_df(df)
+        client.chat_postMessage(channel=user, text="✅ CSV processed and channels handled!")
+    except Exception as e:
+        client.chat_postMessage(channel=user, text=f"❌ Failed to process CSV: {str(e)}")
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
