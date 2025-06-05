@@ -15,18 +15,19 @@ def get_user_id_by_name(name):
     name = name.lstrip("@")
     try:
         result = client.users_list()
+        logger.info(f"Found {result['members']} in the workspace.")
         for member in result['members']:
             if member['name'] == name:
                 return member['id']
     except SlackApiError as e:
-        print(f"Error getting user list: {e.response['error']}")
+        logger.error(f"Error getting user list: {e.response['error']}")
     return None
 
 def get_or_create_channel(channel_name):
     logger.info(f"Checking for channel: {channel_name}")
     try:
-        response = client.conversations_list(types="private_channel", limit=1000)
-        logger.info(f"Found {len(response['channels'])} private channels.")
+        response = client.conversations_list(types="private_channel", limit=1000, exclude_archived=True)
+        logger.info(f"Found {response['channels']} private channels.")
         for ch in response["channels"]:
             if ch["name"] == channel_name:
                 return ch["id"]
