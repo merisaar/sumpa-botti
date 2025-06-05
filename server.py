@@ -34,7 +34,13 @@ def handle_file_shared(event, client, say):
     file_url = file_info["file"]["url_private_download"]
     file_name = file_info["file"]["name"]
     user = event["user_id"]
-
+    client.chat_postMessage(channel=user, text="Does your CSV have a header row? (y/n)")
+    response = client.conversations_history(channel=user, limit=1)
+    user_response = response["messages"][0]["text"].strip().lower()
+    if user_response not in ["y", "n"]:
+        client.chat_postMessage(channel=user, text="❌ Please respond with 'y' or 'n'.")
+        return
+    
     if not file_name.endswith(".xlsx"):
         client.chat_postMessage(channel=user, text="❌ Please upload a valid .xlsx CSV file.")
         return
@@ -42,7 +48,11 @@ def handle_file_shared(event, client, say):
     # Download file with auth
     headers = {"Authorization": f"Bearer {os.environ['SLACK_BOT_TOKEN']}"}
     response = requests.get(file_url, headers=headers)
-    df = pd.read_csv(BytesIO(response.content))
+
+    if user_response == "n":
+        df = pd.read_csv(BytesIO(response.content), header=None)
+    else:
+        df = pd.read_csv(BytesIO(response.content))
 
     process_csv_from_df(df)
 
