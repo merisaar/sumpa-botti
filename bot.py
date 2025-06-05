@@ -44,7 +44,7 @@ def invite_users_to_channel(channel_id, user_ids):
     except SlackApiError as e:
         logger.error(f"Invite failed: {e.response['error']}")
 
-def process_csv_from_df(df):
+def process_csv_from_df(df, user_id):
     grouped = df.groupby("channel_name")["slack_nick"].apply(list)
 
     logger.info("Starting to process CSV data to create channels and invite users.")
@@ -52,7 +52,7 @@ def process_csv_from_df(df):
         channel_id = get_or_create_channel(channel_name)
         if not channel_id:
             continue
-        user_ids = []
+        user_ids = [user_id] # Start with the user who uploaded the CSV
         for nick in nicknames[:5]:
             uid = get_user_id_by_name(nick)
             if uid:
