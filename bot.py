@@ -25,7 +25,7 @@ user_lookup = build_user_lookup()
 def get_user_id_by_name(name):
     logger.info(f"Looking for user ID for: {name}")
     try:
-        nick_clean = name.lstrip("@").lower()
+        nick_clean = name.lstrip("@")
         user_id = user_lookup.get(nick_clean)
         logger.info(f"Lookup {user_lookup}")
         logger.info(f"User ID found: {user_id} for name: {nick_clean}")
