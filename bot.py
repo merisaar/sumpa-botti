@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 def build_user_lookup():
     try:
         response = client.users_list()
-        logger.info(f"Found {response['members']} users in the workspace.")
         users = response["members"]
-        lookup = {user["name"]: user["id"] for user in users if not user.get("deleted", False)}
+        lookup = {user["real_name"]: user["id"] for user in users if not user.get("deleted", False)}
         return lookup
     except SlackApiError as e:
         logger.error(f"Error building user lookup: {e.response['error']}")
@@ -28,7 +27,6 @@ def get_user_id_by_name(name):
     try:
         nick_clean = name.lstrip("@").lower()
         user_id = user_lookup.get(nick_clean)
-        logger.info(f"Found {user_id} in the workspace.")
         if(user_id is not None):
             return user_id
     except SlackApiError as e:
