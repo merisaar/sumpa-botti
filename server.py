@@ -57,7 +57,7 @@ def handle_file_shared(event, client):
         process_csv_from_df(df)
         client.chat_postMessage(channel=user, text="✅ CSV processed and channels handled!")
     except Exception as e:
-        client.chat_postMessage(channel=user, text=f"❌ Failed to process CSV: {str(e)}")
+        client.chat_postMessage(channel=user, text=f"❌ Failed to process CSV: {str(e)}. Please ensure that the file has valid headers 'channel_name' and 'slack_nick'")
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():

@@ -2,13 +2,16 @@ import os
 import pandas as pd
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+import logging
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-EXCEL_FILE = os.getenv("EXCEL_FILE", "channels.xlsx")
 
 client = WebClient(token=SLACK_BOT_TOKEN)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_user_id_by_name(name):
+    logger.info(f"Looking for user ID for: {name}")
     name = name.lstrip("@")
     try:
         result = client.users_list()
@@ -20,6 +23,7 @@ def get_user_id_by_name(name):
     return None
 
 def get_or_create_channel(channel_name):
+    logger.info(f"Checking for channel: {channel_name}")
     try:
         response = client.conversations_list(types="private_channel")
         for ch in response["channels"]:
@@ -32,6 +36,7 @@ def get_or_create_channel(channel_name):
         return None
 
 def invite_users_to_channel(channel_id, user_ids):
+    logger.info(f"Inviting users {user_ids} to channel {channel_id}")
     try:
         client.conversations_invite(channel=channel_id, users=",".join(user_ids))
     except SlackApiError as e:
@@ -40,6 +45,7 @@ def invite_users_to_channel(channel_id, user_ids):
 def process_csv_from_df(df):
     grouped = df.groupby("channel_name")["slack_nick"].apply(list)
 
+    logger.info("Starting to process CSV data to create channels and invite users.")
     for channel_name, nicknames in grouped.items():
         channel_id = get_or_create_channel(channel_name)
         if not channel_id:
