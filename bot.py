@@ -37,7 +37,7 @@ def invite_users_to_channel(channel_id, user_ids):
     except SlackApiError as e:
         print(f"Invite failed: {e.response['error']}")
 
-def process_excel_from_df(df):
+def process_csv_from_df(df):
     grouped = df.groupby("channel_name")["slack_nick"].apply(list)
 
     for channel_name, nicknames in grouped.items():

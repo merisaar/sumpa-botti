@@ -5,14 +5,14 @@ import os, pandas as pd
 from io import BytesIO
 from slack_sdk import WebClient
 import requests
-from bot import process_excel_from_df
+from bot import process_csv_from_df
 
 app = App(token=os.environ["SLACK_BOT_TOKEN"], signing_secret=os.environ["SLACK_SIGNING_SECRET"])
 handler = SlackRequestHandler(app)
 flask_app = Flask(__name__)
 
 # Handle Slash Command
-@app.command("/uploadexcel")
+@app.command("/uploadcsv")
 def handle_upload_command(ack, body, client, respond):
     ack()
     user_id = body["user_id"]
@@ -20,7 +20,7 @@ def handle_upload_command(ack, body, client, respond):
         blocks=[
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"Hi <@{user_id}>! Please upload your Excel file below."}
+                "text": {"type": "mrkdwn", "text": f"Hi <@{user_id}>! Please upload your csv file below."}
             }
         ],
         response_type="ephemeral"
@@ -36,17 +36,17 @@ def handle_file_shared(event, client, say):
     user = event["user_id"]
 
     if not file_name.endswith(".xlsx"):
-        client.chat_postMessage(channel=user, text="❌ Please upload a valid .xlsx Excel file.")
+        client.chat_postMessage(channel=user, text="❌ Please upload a valid .xlsx CSV file.")
         return
 
     # Download file with auth
     headers = {"Authorization": f"Bearer {os.environ['SLACK_BOT_TOKEN']}"}
     response = requests.get(file_url, headers=headers)
-    df = pd.read_excel(BytesIO(response.content))
+    df = pd.read_csv(BytesIO(response.content))
 
-    process_excel_from_df(df)
+    process_csv_from_df(df)
 
-    client.chat_postMessage(channel=user, text="✅ Excel processed and channels handled!")
+    client.chat_postMessage(channel=user, text="✅ CSV processed and channels handled!")
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
