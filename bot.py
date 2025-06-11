@@ -37,9 +37,11 @@ def get_user_id_by_name(name):
     try:
         nick_clean = name.lstrip("@")
         user_id = user_lookup.get(nick_clean)
-        logger.info(f"User ID found: {user_id} for name: {nick_clean}")
         if user_id is not None:
+            logger.info(f"User ID found: {user_id} for name: {nick_clean}")
             return user_id
+        else:
+            logger.warning(f"User ID not found for name: {nick_clean}")
     except SlackApiError as e:
         logger.error(f"Error getting user list: {e.response['error']}")
     return None
@@ -54,7 +56,7 @@ def get_or_create_channel(channel_name):
         result = client.conversations_create(name=channel_name, is_private=True)
         return result["channel"]["id"]
     except SlackApiError as e:
-        logger.error(f"Error with channel: {e.response}")
+        logger.error(f"Error with channel {channel_name}: {e.response}")
         return None
 
 def invite_users_to_channel(channel_id, user_ids):
