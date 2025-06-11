@@ -9,6 +9,7 @@ client = WebClient(token=SLACK_BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 user_lookup = {}
+DRY_RUN = True
 
 def build_user_lookup():
     try:
@@ -75,13 +76,17 @@ def process_csv_from_df(df, user_id):
 
     logger.info("Starting to process CSV data to create channels and invite users.")
     for channel_name, nicknames in grouped.items():
-        channel_id = get_or_create_channel(channel_name)
-        if not channel_id:
-            continue
-        user_ids = [user_id] # Start with the user who uploaded the CSV
-        for nick in nicknames[:5]:
-            uid = get_user_id_by_name(nick)
-            if uid:
-                user_ids.append(uid)
-        if user_ids:
-            invite_users_to_channel(channel_id, user_ids)
+        if DRY_RUN:
+            for nick in nicknames[:5]:
+                get_user_id_by_name(nick)
+        else:
+            channel_id = get_or_create_channel(channel_name)
+            if not channel_id:
+                continue
+            user_ids = [user_id] # Start with the user who uploaded the CSV
+            for nick in nicknames[:5]:
+                uid = get_user_id_by_name(nick)
+                if uid:
+                    user_ids.append(uid)
+            if user_ids:
+                invite_users_to_channel(channel_id, user_ids)
