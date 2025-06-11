@@ -9,10 +9,11 @@ SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 client = WebClient(token=SLACK_BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+user_lookup = {}
 
 def build_user_lookup():
     try:
-        response = client.users_list(limit=999)
+        response = client.users_list()
         logger.info(f"users_list response_metadata: {response['response_metadata']}")
         users = response["members"]
         lookup = {user["name"]: user["id"] for user in users if not user.get("deleted", False)}
@@ -20,8 +21,6 @@ def build_user_lookup():
     except SlackApiError as e:
         logger.error(f"Error building user lookup: {e.response['error']}")
         return {}
-    
-user_lookup = build_user_lookup()
 
 def get_user_id_by_name(name):
     logger.info(f"Looking for user ID for: {name}")
@@ -58,6 +57,9 @@ def invite_users_to_channel(channel_id, user_ids):
 
 def process_csv_from_df(df, user_id):
     grouped = df.groupby("channel_name")["slack_nick"].apply(list)
+
+    global user_lookup
+    user_lookup = build_user_lookup()
 
     logger.info("Starting to process CSV data to create channels and invite users.")
     for channel_name, nicknames in grouped.items():
