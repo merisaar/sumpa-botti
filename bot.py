@@ -45,7 +45,7 @@ def get_or_create_channel(channel_name):
         result = client.conversations_create(name=channel_name, is_private=True)
         return result["channel"]["id"]
     except SlackApiError as e:
-        logger.error(f"Error with channel: {e.response['error']}")
+        logger.error(f"Error with channel: {e.response}")
         return None
 
 def invite_users_to_channel(channel_id, user_ids):
