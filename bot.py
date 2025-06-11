@@ -9,7 +9,7 @@ client = WebClient(token=SLACK_BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 user_lookup = {}
-DRY_RUN = True
+DRY_RUN = False
 
 def build_user_lookup():
     try:
