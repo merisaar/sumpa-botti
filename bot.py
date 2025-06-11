@@ -38,10 +38,10 @@ def get_user_id_by_name(name):
 def get_or_create_channel(channel_name):
     logger.info(f"Checking for channel: {channel_name}")
     try:
-        # response = client.users_conversations(types="private_channel", limit=1000, exclude_archived=True)
-        # for ch in response["channels"]:
-        #     if ch["name"] == channel_name:
-        #         return ch["id"]
+        response = client.users_conversations(types="private_channel", limit=1000, exclude_archived=True)
+        for ch in response["channels"]:
+            if ch["name"] == channel_name:
+                return ch["id"]
         result = client.conversations_create(name=channel_name, is_private=True)
         return result["channel"]["id"]
     except SlackApiError as e:
