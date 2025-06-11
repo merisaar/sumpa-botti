@@ -22,7 +22,7 @@ def build_user_lookup():
 
             for user in users:
                 if not user.get("deleted", False):
-                    lookup[user["name"]] = user["id"]
+                    lookup[user["real_name"]] = user["id"]
 
             if not (cursor := response.get("response_metadata", {}).get("next_cursor", None)):
                 break
@@ -37,7 +37,6 @@ def get_user_id_by_name(name):
     try:
         nick_clean = name.lstrip("@")
         user_id = user_lookup.get(nick_clean)
-        logger.info(f"Lookup {user_lookup}")
         logger.info(f"User ID found: {user_id} for name: {nick_clean}")
         if(user_id is not None):
             return user_id
@@ -70,6 +69,7 @@ def process_csv_from_df(df, user_id):
 
     global user_lookup
     user_lookup = build_user_lookup()
+    logger.info(f"Built users dict: {user_lookup}")
 
     logger.info("Starting to process CSV data to create channels and invite users.")
     for channel_name, nicknames in grouped.items():
