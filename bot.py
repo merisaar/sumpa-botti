@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import logging
@@ -22,7 +21,8 @@ def build_user_lookup():
 
             for user in users:
                 if not user.get("deleted", False):
-                    lookup[user["real_name"]] = user["id"]
+                    if display_name := user.get("profile", {}).get("display_name", None):
+                        lookup[display_name] = user["id"]
 
             if not (cursor := response.get("response_metadata", {}).get("next_cursor", None)):
                 break
@@ -38,7 +38,7 @@ def get_user_id_by_name(name):
         nick_clean = name.lstrip("@")
         user_id = user_lookup.get(nick_clean)
         logger.info(f"User ID found: {user_id} for name: {nick_clean}")
-        if(user_id is not None):
+        if user_id is not None:
             return user_id
     except SlackApiError as e:
         logger.error(f"Error getting user list: {e.response['error']}")
