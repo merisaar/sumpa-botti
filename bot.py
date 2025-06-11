@@ -38,7 +38,7 @@ def get_user_id_by_name(name):
 def get_or_create_channel(channel_name):
     logger.info(f"Checking for channel: {channel_name}")
     try:
-        response = client.conversations_list(types="private_channel", limit=1000, exclude_archived=True)
+        response = client.users_conversations(types="private_channel", limit=1000, exclude_archived=True)
         for ch in response["channels"]:
             if ch["name"] == channel_name:
                 return ch["id"]
