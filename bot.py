@@ -9,7 +9,8 @@ client = WebClient(token=SLACK_BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 user_lookup = {}
-DRY_RUN = False
+display_names_with_duplicates = []
+DRY_RUN = True
 
 def build_user_lookup():
     try:
@@ -28,6 +29,9 @@ def build_user_lookup():
                         display_name = user["name"]
 
                     if display_name:
+                        if lookup[display_name]:
+                            display_names_with_duplicates.append(display_name)
+
                         lookup[display_name] = user["id"]
                     else:
                         logger.warning(f"Display name not found in user data: {user}")
@@ -47,6 +51,10 @@ def get_user_id_by_name(name):
         user_id = user_lookup.get(nick_clean)
         if user_id is not None:
             logger.info(f"User ID found: {user_id} for name: {nick_clean}")
+
+            if nick_clean in display_names_with_duplicates:
+                logger.warning(f"{nick_clean} is used by multiple users!")
+
             return user_id
         else:
             logger.warning(f"User ID not found for name: {nick_clean}")
