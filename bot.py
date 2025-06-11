@@ -22,8 +22,11 @@ def build_user_lookup():
 
             for user in users:
                 if not user.get("deleted", False):
-                    if display_name := user.get("profile", {}).get("display_name", None):
+                    display_name = user.get("profile", {}).get("display_name", None)
+                    if display_name:
                         lookup[display_name] = user["id"]
+                    else:
+                        logger.warning(f"Display name not found in user data: {user}")
 
             if not (cursor := response.get("response_metadata", {}).get("next_cursor", None)):
                 break
