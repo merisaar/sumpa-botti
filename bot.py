@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 def build_user_lookup():
     try:
         response = client.users_list(limit=1000)
+        logger.info(f"users_list response: {response}")
         users = response["members"]
         lookup = {user["name"]: user["id"] for user in users if not user.get("deleted", False)}
         return lookup
