@@ -14,7 +14,7 @@ def build_user_lookup():
     try:
         response = client.users_list()
         users = response["members"]
-        lookup = {user["real_name"]: user["id"] for user in users if not user.get("deleted", False)}
+        lookup = {user["name"]: user["id"] for user in users if not user.get("deleted", False)}
         return lookup
     except SlackApiError as e:
         logger.error(f"Error building user lookup: {e.response['error']}")
