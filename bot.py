@@ -29,7 +29,7 @@ def build_user_lookup():
                         display_name = user["name"]
 
                     if display_name:
-                        if lookup[display_name]:
+                        if display_name in lookup:
                             display_names_with_duplicates.append(display_name)
 
                         lookup[display_name] = user["id"]
